@@ -1,0 +1,289 @@
+@CHARSET "UTF-8";
+
+
+@keyframes spin {
+    from { transform:rotate(0deg); }
+    to { transform:rotate(360deg); }
+}
+
+.spin {
+	/*animation: spin 4s infinite linear;*/
+	-webkit-animation-play-state: paused;
+			animation-play-state: paused;
+}
+
+body {
+    font-size: 1.5em;
+    font-family: 'Roboto', sans-serif;
+    padding: 0;
+    margin: 0;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    background:  url('images/png/bg.png');
+    color: #2e292e;
+    /*text-shadow: #000 3px 3px 3px;*/
+    font-family: 'Open Sans', sans-serif;
+}
+
+/*body:after {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-image: url('images/png/bg.png');
+    width: 100%;
+    height: 100%;
+    opacity: 0.8;
+    z-index: -1;
+}*/
+
+div {
+	/*border: 1px solid white;*/
+	box-sizing: border-box;
+}
+
+#container {
+	/*width: 100%;
+	height: 100%;*/
+	margin: 65px 135px;
+	z-index: 1;
+	box-sizing: border-box;
+}
+
+#header {
+	height: 250px;
+	position: relative;
+}
+
+.logo {
+	position: absolute;
+	top: 0;
+	left: 0;
+	display: block;
+}
+
+.live {
+	position: absolute;
+	top: 0;
+	right: 0;
+	font-size: 70px;
+	font-weight: 300;
+	color: #ffffff;
+	margin: 0;
+	padding: 0;
+}
+
+#content {
+	height: 430px;
+	padding: 15px;
+}
+
+.chosen {
+	-webkit-transform: scale(1.2);
+			transform: scale(1.2);
+	border: 1px solid white;
+	opacity: 0.7;
+}
+
+/*#slider {
+	width: 850px;
+	margin: 0 auto;
+	background: none;
+	margin-left: 40%;
+    margin-right: 40%;
+}*/
+
+.station {
+	border: 1px solid white;
+}
+/*
+.station img {
+	width: 100%;
+	transition: all 1s ease-in-out;
+}*/
+/*
+.station.active-slide {
+	border: 1px solid #113A41;
+	z-index: 1000;
+}
+*/
+.station.active-slide img {
+	/*-webkit-transform: scale(1.1);
+			transform: scale(1.1);
+	outline: 1px solid #113A41 !important;
+	z-index: 1000;*/
+	box-shadow: 1px 1px 20px #333;
+}
+
+audio {
+	background: none;
+	border: none;
+}
+
+#footer {
+	/*height: 300px;*/
+}
+
+.bx-wrapper {
+	box-shadow: none;
+	background: none;
+	border: none;
+}
+
+.bx-wrapper .bx-loading {
+	 background: url('images/bx_loader.gif') center center no-repeat transparent;
+}
+
+.bx-wrapper .bx-prev,
+.bx-wrapper .bx-next {
+	width: 48px;
+	height: 47px;
+	margin-top: -24px;
+	border-top: 1px solid #ffffff;
+	border-left: 1px solid #ffffff;
+	background: none;
+}
+
+.bx-wrapper .bx-prev {
+	left: -50px;
+	transform: rotate(-45deg);
+}
+
+.bx-wrapper .bx-next {
+	right: -50px;
+	transform: rotate(-225deg);
+}
+
+.bx-wrapper .bx-prev:hover,
+.bx-wrapper .bx-prev:focus,
+.bx-wrapper .bx-next:hover,
+.bx-wrapper .bx-next:focus {
+	border-top: 1px solid #ffff00;
+	border-left: 1px solid #ffff00;
+}
+
+.controls {
+	width: 960px;
+	margin: 0 auto;
+	height: 130px;
+	padding-left: 60px;
+}
+
+.playpause {
+	display: inline-block;
+	-webkit-animation: spin 4s infinite linear;
+	  		animation: spin 4s infinite linear;
+	/*-webkit-animation-play-state: paused;*/
+}
+
+.info {
+	display: inline-block;
+	vertical-align: top;
+	color: white;
+	text-align: left;
+	margin-left: 25px;
+}
+
+.info .title p {
+	margin: 0;
+	padding: 0;
+	opacity: 0.8;
+}
+
+.info .title .song {
+	font-size: 36px;
+	font-weight: 300;
+}
+
+.info .title .artist {
+	font-size: 24px;
+}
+
+.progress {
+	 width: 709px;
+	 height: 4px;
+	 display: inline-block;
+	 position: relative;
+}
+
+.progress-bar {
+	 width: 709px;
+	 height: 4px;
+	 opacity: 0.24;
+	 background-color: #ffffff;
+	 position: relative;
+}
+
+.stream {
+  width: 17px;
+  height: 4px;
+  background-color: #edff00;
+  position: absolute;
+  top: 0;
+  left: 20px;
+}
+
+.menu {
+	padding-top: 65px;
+	border: none;
+	border-top: solid 1px #f9ff82;
+	direction: rtl;
+	text-align: center;
+	color: white;
+	position: relative;
+}
+
+.menu div {
+	width: 304px;
+  	height: 169px;
+  	background: none;
+  	position: relative;
+  	display: inline-block;
+  	margin: 13px;
+  	font-family: FbSpoiler;
+	font-size: 18px;
+	font-weight: 300;
+	text-align: center;
+	overflow: hidden;
+}
+
+.menu .bglayer {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	top: -13px;
+	left: 0;
+	background-color: #113A41;
+	opacity: 0.6;
+	z-index: -1;
+}
+
+.menu div:last-child {
+	margin-left: 0;
+}
+
+.menu div:first-child {
+	margin-right: 0;
+}
+
+.menu .icon {
+	position: absolute;
+	top: 54px;
+	left: 131px;
+	display: block;
+}
+
+.menu p {
+	position: absolute;
+	bottom: 15px;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+.menu .music {
+	border: solid 2px #f8e81c;
+	color: #ffff00;
+}
