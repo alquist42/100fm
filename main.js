@@ -2,7 +2,7 @@
     'use strict';
     
     
-    var slider, player, stations;
+    var menu, slider, player, stations, current_station, songField, artistField;
     
     /**
      * Displays logging information on the screen and in the console.
@@ -61,7 +61,10 @@
         	log(e.keyCode);
             switch (e.keyCode) {
                 case 13:    // Enter
-//                    player.toggleFullscreen();
+//                    var id = slider.slick('slickCurrentSlide');
+                    //log(id);
+//                    changeStation(id);
+                    menu.set();
                     break;
                 case 10252: // MediaPlayPause
                 case 415:   // MediaPlay
@@ -78,10 +81,12 @@
                     player.rew();
                     break;
                 case 37:   // ArrowLeft
-                    slider.goToPrevSlide();
+//                    slider.slick('slickPrev');
+                    menu.prev();
                     break;
                 case 39:   // ArrowRight
-                    slider.goToNextSlide();
+//                    slider.slick('slickNext');
+                    menu.next();
                     break;
                 case 38:   // ArrowUp
 //                    $('.menu').removeClass('chosen');
@@ -151,6 +156,27 @@
             player.toggleFullscreen
         );
     }
+    
+    function render(template, data) {
+        var i = 0,
+            len = data.length,
+            html = '';
+        // Replace the {{XXX}} with the corresponding property
+        function replaceWithData(data_bit) {
+            var html_snippet, prop, regex;
+            for (prop in data_bit) {
+                regex = new RegExp('{{' + prop + '}}', 'ig');
+                html_snippet = (html_snippet || template).replace(regex, data_bit[prop]);
+            }
+            return html_snippet;
+        }
+        // Go through each element in the array and add the properties to the template
+        for (; i < len; i++) {
+            html += replaceWithData(data[i]);
+        }
+        // Give back the HTML to be added to the DOM
+        return html;
+    };
 
     /**
      * Display application version
@@ -162,31 +188,68 @@
         document.body.appendChild(el);
     }
     
-    function createSlider() {
-    	$.each(stations, function(index, station){
-    		var img = $('<img />', { 
-    			src: station.cover,
-    			alt: station.name
-    		});
-    		var div = $('<div class="station"></div>').data('id', index);
-    		img.appendTo(div);
-//    		log(div.html());
-    		div.appendTo($('#slider'));
-    	});
+    function Menu(tab) {
+    	var items = ['music', 'talks', 'live', 'list', 'fav'],
+    	    item  = tab || items[0],
+    	    index = (tab) ? items.indexOf(tab) : 0,
+    		itlen = items.length,
+    		links = $('.menu').children('div'),
+    		tabs  = $('.tab');
     	
+    	return {
+    		prev: function() {
+    			index = items.indexOf(item);
+    			if (index == -1) return;
+    			if (++index == itlen) index = 0;
+    			item = items[index];
+    			
+    			links.removeClass('active');
+    			links.eq(index).addClass('active');
+    			
+    			return this;
+    		},
+    		next: function() {
+    			index = items.indexOf(item);
+    			if (index == -1) return;
+    			if (--index < 0) index = (itlen - 1);
+    			item = items[index];
+    			
+    			links.removeClass('active');
+    			links.eq(index).addClass('active');
+    			
+    			return this;
+    		},
+    		set: function(tab) {
+    			item = tab || item;
+    			if (!items.includes(item)) return;
+    			index = items.indexOf(item);
+    			
+    			tabs.removeClass('active');
+    			tabs.eq(index).addClass('active');
+    			log(item);
+    			return this;
+    		}
+    	}
     }
     
-    function getStation (id) {
-    	var res = false;
-    	$.each(stations, function(index, station){
-//    		log('id: ' + id + ', index: ' + index);
-    		if (index == id) {
-    			res = station;
-    			return false;
-    		}
-    	});
-    	return res;
-    }
+    function changeStation(id) {
+    	current_station = stations[id];
+    	now_playing();
+		
+		player.src = current_station.audioA;
+		player.load();
+		player.play();
+		
+		slider.find('.slick-slide').removeClass('chosen');
+		slider.find('.slick-slide.slick-current').addClass('chosen');
+    } 
+    
+    function now_playing() {
+    	$.get(current_station.info, function(data) {
+			songField.html($(data).find('name').text());
+			artistField.html($(data).find('artist').text());
+		}, 'xml');
+    } 
     
 	/**
 	 * Function initialising application.
@@ -199,96 +262,59 @@
             return;
         }
 		
+		menu = Menu().set();
+		songField   = $('.song'),
+		artistField = $('.artist');
+		player = $('#audio')[0];
+		slider = $('.slider');
+		
 		$.get('http://digital.100fm.co.il/app/', function(data){
-			 stations = data.stations;
-			 player = $('#audio')[0];
-				
-				var songField = $('.song'),
-					artistField = $('.artist');
-				
-				displayVersion();
-		        registerKeys();
-		        registerKeyHandler();
-		        createSlider();
+			
+			stations = data.stations;
+			
+			slider.html(render('<div><img src="{{cover}}" alt="{{name}}"/></div>', stations));
+	
+			registerKeys();
+			registerKeyHandler();
 		        
-		        $('.station').on('click', function() {
-		        	var id = $(this).data('id');
-		        	var station = getStation(id);
-		        	log(id + '::' + station.name);
-//		        	player.stop();
-		        	player.src = station.audioA;
-		        	player.load();
-		        	player.play();
-		        });
-		        
-//		        slider = $('#slider').bxSlider({
-//		            slideWidth: 315,
-//		            minSlides: 5,
-//		            maxSlides: 5,
-//		            slideMargin: 15,
-//		            infiniteLoop: true,
-//		            easing: 'ease,',
-//		            pager: false,
-//		            moveSlides: 1,
-//		            onSlideBefore: function($slideElement, oldIndex, newIndex){
-//		            	var station = getStation(newIndex);
-////		            	log();
-////		            	log(station.name);
-//		            	var info = $.get(station.info, function(data) {
-//		            		songField.html($(data).find('name').text());
-//		            		artistField.html($(data).find('artist').text());
-//		                }, 'xml');
-////		            	player.stop();
-//		            	player.src = station.audioA;
-//		            	player.load();
-//		            	player.play();
-//		            	
-//		            	log(player.src + ', ispaused: ' + JSON.stringify(player.paused));
-//		            },
-//		            onSlideAfter: function ($slideElement, oldIndex, newIndex) {
-////		            	log($slideElement.attr('class'));
-//		                $('.active-slide').removeClass('active-slide');
-//		                $slideElement.addClass('active-slide');
-//		            },
-//		            onSliderLoad: function () {
-//		                $('.station').eq(0).addClass('active-slide');
-//		            },
-//		        });    
-		        
-		        slider = $('#slider').slick({
-		        	  centerMode: true,
-		        	  centerPadding: '60px',
-		        	  slidesToShow: 5
-	        	});
-			    
-		        player.stop = function() {
-		        	this.pause();
-		        	this.currentTime = 0;
-		        };
-		        player.playPause = function () {
-		        	var bt = $('.playpause');
-		        	if (this.paused) {
-		        		this.play();
-//		        		bt.addClass('spin');
-		        		bt[0].style.webkitAnimationPlayState = "running";
-		        	}
-		        	else {
-		        		this.pause();
-//		        		bt.removeClass('spin');
-		        		bt[0].style.webkitAnimationPlayState = "paused";
-		        	}
-		        }
-			    player.src = stations[0].audioA;
-			    player.loop = true;
-			    player.controls = false;
-			    player.load();
-			    player.play();
-			    
-//			    log('Current slide: ' + slider.getCurrentSlide());
-//		        log('All slides: ' + slider.getSlideCount());
+	        slider.on('click', '.slick-slide.slick-active', function() {
+	        	var id = $(this).data('slick-index');
+	        	changeStation(id);
+	        	slider.slick('slickGoTo', id);
+	        	slider.find('.slick-slide').removeClass('chosen');
+	    		$(this).addClass('chosen');
+	        });
+		   		        
+	        slider.on('init', function(slick){
+	        	changeStation(0);
+				setInterval(now_playing, 30000);
+	        });
+	        
+	        slider.slick({
+				 centerMode: true,
+				 centerPadding: '0',
+				 slidesToShow: 5
+	        });
+	        
 		}, 'json');
 		
+		player.stop = function() {
+        	this.pause();
+        	this.currentTime = 0;
+        };
         
+        player.playPause = function () {
+        	var bt = $('.playpause');
+        	if (this.paused) {
+        		this.play();
+//	        		bt.addClass('spin');
+        		bt[0].style.webkitAnimationPlayState = "running";
+        	}
+        	else {
+        		this.pause();
+//	        		bt.removeClass('spin');
+        		bt[0].style.webkitAnimationPlayState = "paused";
+        	}
+        }
 	};
-
 }());
