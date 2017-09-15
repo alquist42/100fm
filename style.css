@@ -20,11 +20,18 @@ body {
     width: 1920px;
     height: 1080px;
     overflow: hidden;
-    background:  url('images/png/bg.png');
+    background: linear-gradient(to bottom, #5c82a5, #2f6c69);
+    background-attachment: fixed;
+    background-image:  url('images/png/bg.png');
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
     color: #2e292e;
     /*text-shadow: #000 3px 3px 3px;*/
     font-family: 'Open Sans', sans-serif;
     position: relative;
+    -webkit-transition: background-image 0.5s linear;
+    		transition: background-image 0.5s linear;
 }
 
 .container {
@@ -87,15 +94,15 @@ header {
 	height: 100%;
 }
 
-.slick-slide.slick-current img{
+body:not(.navigation) .slick-slide.slick-current img{
+	outline: 2px solid #edff00;
+}
+
+.slick-slider .chosen img{
 	-webkit-transform: scale(1.1);
 			transform: scale(1.1);
 	z-index: 1000;
 	box-shadow: 1px 1px 20px #333;
-}
-
-.slick-slide.chosen img{
-	border: 1px solid #edff00;
 }
 
 audio {
@@ -210,7 +217,7 @@ footer {
 .menu {
 	padding-top: 65px;
 	border: none;
-	border-top: solid 1px #f9ff82;
+	border-top: solid 1px white;
 	direction: rtl;
 	text-align: center;
 	color: white;
@@ -265,8 +272,8 @@ footer {
 	padding: 0;
 }
 
-.menu .active {
-	border: solid 2px #f8e81c;
+body.navigation .menu .active {
+	outline: solid 2px #f8e81c;
 	color: #ffff00;
 }
 

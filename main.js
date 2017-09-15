@@ -2,7 +2,9 @@
     'use strict';
     
     
-    var menu, slider, player, stations, current_station, songField, artistField;
+    var menu, slider, player, stream, 
+    	current_station, songField, artistField, 
+    	stations = [], videos = [], favourites = [], content = [], menu_nav = false;
     
     /**
      * Displays logging information on the screen and in the console.
@@ -61,10 +63,12 @@
         	log(e.keyCode);
             switch (e.keyCode) {
                 case 13:    // Enter
-//                    var id = slider.slick('slickCurrentSlide');
-                    //log(id);
-//                    changeStation(id);
-                    menu.set();
+                	if (menu_nav) {
+                		menu.set();
+                	}
+                	else {
+	                    changeStation(slider.slick('slickCurrentSlide'));
+                	}        
                     break;
                 case 10252: // MediaPlayPause
                 case 415:   // MediaPlay
@@ -81,20 +85,18 @@
                     player.rew();
                     break;
                 case 37:   // ArrowLeft
-//                    slider.slick('slickPrev');
-                    menu.prev();
+                	(menu_nav) ? menu.prev() : slider.slick('slickPrev');
                     break;
                 case 39:   // ArrowRight
-//                    slider.slick('slickNext');
-                    menu.next();
+                    (menu_nav) ? menu.next() : slider.slick('slickNext');
                     break;
                 case 38:   // ArrowUp
-//                    $('.menu').removeClass('chosen');
-//                    $('.bx-wrapper').addClass('chosen');
+                    menu_nav = false;
+                    $('body').removeClass('navigation');
                     break;
                 case 40:   // ArrowDown
-//                	$('.bx-wrapper').removeClass('chosen');
-//                	$('.menu').addClass('chosen');
+                	menu_nav = true;
+                	$('body').addClass('navigation');
                     break;
                 case 412:   // MediaRewind
                    // player.rew();
@@ -224,6 +226,9 @@
     			if (!items.includes(item)) return;
     			index = items.indexOf(item);
     			
+    			links.removeClass('active');
+    			links.eq(index).addClass('active');
+    			
     			tabs.removeClass('active');
     			tabs.eq(index).addClass('active');
     			log(item);
@@ -246,10 +251,64 @@
     
     function now_playing() {
     	$.get(current_station.info, function(data) {
-			songField.html($(data).find('name').text());
-			artistField.html($(data).find('artist').text());
+    		
+    		if (!current_station.now) {current_station.now = {}}
+    		
+    		current_station.now.name = $(data).find('name').text();
+    		current_station.now.artist = $(data).find('artist').text();
+			
+			var term = encodeURI($(data).find('name').text() + ' ' + $(data).find('artist').text());
+			var uri = "https://itunes.apple.com/search?limit=1&entity=song&term=" + term;
+			
+			search_song(uri, function(){
+				songField.html(current_station.now.name);
+				artistField.html(current_station.now.artist);
+			});
+		
 		}, 'xml');
     } 
+    
+    function search_song(uri, callback) {
+    	
+    	log(uri);
+    	
+    	$.get(uri, function(data){
+    		log('got data');
+    		var res = data.results[0];
+    		
+    		if (!res) {
+				$('body').css('background-image', 'url(images/png/bg.png)');
+				return;
+			}
+    		
+    		current_station.now.name   = res.trackName || current_station.now.name;
+    		current_station.now.artist = res.artistName || current_station.now.artist;
+    	    current_station.now.album  = res.collectionName || '';
+			current_station.now.timems = res.trackTimeMillis || 0;
+			
+			callback();
+			
+			if (res.artworkUrl100 === undefined) {
+				$('body').css('background-image', 'url(images/png/bg.png)');
+				return;
+			}
+			
+			var uri = res.artworkUrl100
+			var cover = uri.replace('100x100', '600x600');
+			var hires = uri.replace('100x100bb', '100000x100000-999');
+
+			var parser = document.createElement('a');
+			parser.href = hires;
+			parser.host = 'is5.mzstatic.com';
+			
+			var $downloadingImage = $("<img>");
+			$downloadingImage.load(function() {	
+				$('body').css('background-image', 'url(' + $(this).attr("src") + ')');
+			});
+			$downloadingImage.attr("src", parser.href);
+			
+    	}, 'json');
+    }
     
 	/**
 	 * Function initialising application.
@@ -271,6 +330,8 @@
 		$.get('http://digital.100fm.co.il/app/', function(data){
 			
 			stations = data.stations;
+			stream = data.video.stream;
+			videos = data.video.archive;
 			
 			slider.html(render('<div><img src="{{cover}}" alt="{{name}}"/></div>', stations));
 	
@@ -295,6 +356,15 @@
 				 centerPadding: '0',
 				 slidesToShow: 5
 	        });
+	        
+	        for (var index in stations) {
+	        	if (stations[index].popular == 'true'){
+	        		favourites.push(stations[index]);
+	        		console.log(stations[index].name);
+	        	}
+	        } 
+	        
+	        console.log(favourites);
 	        
 		}, 'json');
 		
